@@ -1,0 +1,11 @@
+## Interface: 120105
+## Title: Downtime
+## Notes: Experience and leveling efficiency tracker
+## Author: Ancient Workshop - https://ancient.dev
+## Version: 0.1.0
+## SavedVariablesPerCharacter: DowntimeCharacterDB
+
+Errors.lua
+Experience.lua
+Interface.lua
+Core.lua

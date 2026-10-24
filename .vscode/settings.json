@@ -1,0 +1,16 @@
+{
+  "Lua.runtime.version": "Lua 5.1",
+  "Lua.workspace.checkThirdParty": false,
+  "Lua.diagnostics.globals": [
+    "CreateFrame",
+    "UnitXP",
+    "UnitXPMax",
+    "UnitLevel",
+    "GetTime",
+    "UIParent",
+    "SlashCmdList"
+  ],
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}
