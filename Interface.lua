@@ -31,6 +31,39 @@ local function FormatNumber(value)
     return formatted
 end
 
+-- Interpolate rolling XP/hour colors against the session average.
+-- The session average itself always remains white.
+local function PerformanceColor(rolling, average, windowSeconds, elapsed)
+    if not DowntimeDB.performanceColors or average <= 0
+        or elapsed < windowSeconds then
+        return 1, 1, 1
+    end
+
+    local ratio = rolling / average
+    local stops = {
+        { 0.50, 0.937, 0.267, 0.267 }, -- Red
+        { 0.80, 0.976, 0.451, 0.086 }, -- Orange
+        { 1.00, 1.000, 1.000, 1.000 }, -- White
+        { 1.20, 0.290, 0.871, 0.502 }  -- Green
+    }
+
+    if ratio <= stops[1][1] then
+        return stops[1][2], stops[1][3], stops[1][4]
+    end
+
+    for i = 2, #stops do
+        local previous, current = stops[i - 1], stops[i]
+        if ratio <= current[1] then
+            local t = (ratio - previous[1]) / (current[1] - previous[1])
+            return previous[2] + (current[2] - previous[2]) * t,
+                previous[3] + (current[3] - previous[3]) * t,
+                previous[4] + (current[4] - previous[4]) * t
+        end
+    end
+
+    return stops[#stops][2], stops[#stops][3], stops[#stops][4]
+end
+
 local function AnchorDisplay()
     display:ClearAllPoints()
     if DowntimeDB and DowntimeDB.detached then
@@ -95,6 +128,19 @@ function addon:UpdateDisplay()
     items.rolling5.value:SetText(FormatNumber(stats.rolling5))
     items.rolling15.value:SetText(FormatNumber(stats.rolling15))
     items.rolling30.value:SetText(FormatNumber(stats.rolling30))
+
+    -- Only color a window after its full duration has been observed.
+    -- This avoids misleading comparisons early in a session.
+    for _, window in ipairs({
+        { key = "rolling5",  seconds = 300 },
+        { key = "rolling15", seconds = 900 },
+        { key = "rolling30", seconds = 1800 }
+    }) do
+        local r, g, b = PerformanceColor(
+            stats[window.key], stats.xpPerHour, window.seconds, stats.elapsed
+        )
+        items[window.key].value:SetTextColor(r, g, b)
+    end
 
     if stats.xpPerHour > 0 then
         local remaining = UnitXPMax("player") - UnitXP("player")

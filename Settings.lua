@@ -3,6 +3,7 @@ local addonName, addon = ...
 local defaults = {
     layout = "comfortable",
     opacity = 0.88,
+    performanceColors = true,
     visible = {
         xp = true,
         last = true,
@@ -15,9 +16,12 @@ local defaults = {
 
 local order = { "xp", "last", "tnl", "rolling5", "rolling15", "rolling30" }
 local names = {
-    xp = "Session XP/hour", last = "Time since last XP",
-    tnl = "Time to next level", rolling5 = "5-minute XP/hour",
-    rolling15 = "15-minute XP/hour", rolling30 = "30-minute XP/hour"
+    xp = "Session XP/hour",
+    last = "Time since last XP",
+    tnl = "Time to next level",
+    rolling5 = "5-minute XP/hour",
+    rolling15 = "15-minute XP/hour",
+    rolling30 = "30-minute XP/hour"
 }
 
 function addon:InitializeSettings()
@@ -28,6 +32,9 @@ function addon:InitializeSettings()
     end
     if type(db.opacity) ~= "number" then db.opacity = defaults.opacity end
     db.opacity = math.max(0.2, math.min(1, db.opacity))
+    if type(db.performanceColors) ~= "boolean" then
+        db.performanceColors = defaults.performanceColors
+    end
     if type(db.visible) ~= "table" then db.visible = {} end
     for _, key in ipairs(order) do
         if type(db.visible[key]) ~= "boolean" then
@@ -40,6 +47,7 @@ function addon:ResetDisplaySettings()
     self:InitializeSettings()
     DowntimeDB.layout = defaults.layout
     DowntimeDB.opacity = defaults.opacity
+    DowntimeDB.performanceColors = defaults.performanceColors
     for _, key in ipairs(order) do
         DowntimeDB.visible[key] = true
     end
@@ -53,6 +61,7 @@ local checks = {}
 local layoutButtons = {}
 local opacityValue
 local opacitySlider
+local performanceCheck
 
 function addon:RefreshSettingsWindow()
     if not window then return end
@@ -66,13 +75,16 @@ function addon:RefreshSettingsWindow()
     end
     opacitySlider:SetValue(math.floor(DowntimeDB.opacity * 100 + 0.5))
     opacityValue:SetText(math.floor(DowntimeDB.opacity * 100 + 0.5) .. "%")
+    if performanceCheck then
+        performanceCheck:SetChecked(DowntimeDB.performanceColors)
+    end
 end
 
 function addon:OpenSettings()
     self:InitializeSettings()
     if not window then
         window = CreateFrame("Frame", "DowntimeSettingsFrame", UIParent, "BasicFrameTemplateWithInset")
-        window:SetSize(345, 385)
+        window:SetSize(345, 425)
         window:SetPoint("CENTER")
         window:SetFrameStrata("DIALOG")
         window:SetMovable(true)
@@ -135,6 +147,16 @@ function addon:OpenSettings()
             local rounded = math.floor(value + 0.5)
             DowntimeDB.opacity = rounded / 100
             opacityValue:SetText(rounded .. "%")
+            addon:RefreshDisplayLayout()
+        end)
+
+        performanceCheck = CreateFrame("CheckButton", nil, window, "UICheckButtonTemplate")
+        performanceCheck:SetPoint("TOPLEFT", window, "TOPLEFT", 18, -348)
+        local performanceText = performanceCheck:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        performanceText:SetPoint("LEFT", performanceCheck, "RIGHT", 3, 0)
+        performanceText:SetText("Color rolling XP/hour by performance")
+        performanceCheck:SetScript("OnClick", function(self)
+            DowntimeDB.performanceColors = self:GetChecked() and true or false
             addon:RefreshDisplayLayout()
         end)
 
