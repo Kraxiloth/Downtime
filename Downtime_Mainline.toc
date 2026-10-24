@@ -2,7 +2,8 @@
 ## Title: Downtime
 ## Notes: Experience and leveling efficiency tracker
 ## Author: Ancient Workshop - https://ancient.dev
-## Version: 0.1.0
+## Version: 0.2.0
+## SavedVariables: DowntimeDB
 ## SavedVariablesPerCharacter: DowntimeCharacterDB
 
 Errors.lua
