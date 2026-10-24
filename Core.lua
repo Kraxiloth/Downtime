@@ -53,6 +53,20 @@ SlashCmdList["DOWNTIME"] = function(message)
         return
     end
 
+    if message == "config" or message == "settings" then
+        addon:SafeCall("Settings", function()
+            addon:OpenSettings()
+        end)
+        return
+    end
+
+    if message == "resetsettings" then
+        addon:SafeCall("Settings", function()
+            addon:ResetDisplaySettings()
+        end)
+        return
+    end
+
     if message == "reset" then
         addon:SafeCall("Commands", function()
             addon:ResetDisplayPosition()

@@ -7,5 +7,6 @@
 
 Errors.lua
 Experience.lua
+Settings.lua
 Interface.lua
 Core.lua
